@@ -1,0 +1,42 @@
+You can specify conditions under which a step, job, or stage will run.
+
+Only when all previous dependencies with the same agent pool have succeeded. If you have different agent pools, those stages or jobs will run concurrently. This is the default if there is not a condition set in the YAML.
+
+Even if a previous dependency has failed, unless the run was canceled. Use succeededOrFailed() in the YAML for this condition.
+
+Even if a previous dependency has failed, even if the run was canceled. Use always() in the YAML for this condition.
+
+Only when a previous dependency has failed. Use failed() in the YAML for this condition.
+
+Custom conditions
+By default, steps, jobs, and stages run if all previous steps/jobs have succeeded. It's as if you specified "condition: succeeded()"
+
+jobs:
+- job: Foo
+
+  steps:
+  - script: echo Hello!
+    condition: always() # this step will always run, even if the pipeline is canceled
+
+- job: Bar
+  dependsOn: Foo
+  condition: failed() # this job will only run if Foo fails
+  
+  You can also use variables in conditions.
+  variables:
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+
+stages:
+- stage: A
+  jobs:
+  - job: A1
+    steps:
+      - script: echo Hello Stage A!
+
+- stage: B
+  condition: and(succeeded(), eq(variables.isMain, 'true'))
+  jobs:
+  - job: B1
+    steps:
+      - script: echo Hello Stage B!
+      - script: echo $(isMain)
