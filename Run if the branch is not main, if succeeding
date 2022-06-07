@@ -1,0 +1,1 @@
+and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'))
