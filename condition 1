@@ -1,0 +1,13 @@
+You can specify that a job run based on the value of an output variable set in a previous job. In this case, you can only use variables set in directly dependent jobs
+
+jobs:
+- job: A
+  steps:
+  - script: "echo ##vso[task.setvariable variable=skipsubsequent;isOutput=true]false"
+    name: printvar
+
+- job: B
+  condition: and(succeeded(), ne(dependencies.A.outputs['printvar.skipsubsequent'], 'true'))
+  dependsOn: A
+  steps:
+  - script: echo hello from B
